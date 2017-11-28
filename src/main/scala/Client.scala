@@ -15,7 +15,7 @@ class Client(id : String , server : ActorRef) extends Actor {
 
   /* Lista mail ricevute */
 
- var inbox : List[Email] = null
+ var inbox = List[Email]()
 
  val log = Logging(context.system,this)
 

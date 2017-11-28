@@ -2,7 +2,7 @@
 
 /* Messaggi per la connessione */
 
-case object ConnectionRequest
+case class ConnectionRequest(id :String)
 case object ConnectionSuccess
 case object ConnectionFail
 

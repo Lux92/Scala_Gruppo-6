@@ -1,29 +1,35 @@
 import akka.actor.{Actor, ActorRef, Props}
 import akka.event.Logging
 
-object Server {
-
-}
 
 class Server() extends Actor {
   val log = Logging(context.system , this)
 
- var userList : List[ActorRef] = null
+ var users = Map[String,ActorRef]()
 
   override def receive: Receive = {
 // Connessione Riuscita
-    case ConnectionRequest =>
+    case ConnectionRequest(id) =>
       log.info("Ricevuta richiesta di connessione da" + sender() )
-      userList = sender() :: userList
+      users = users +  (id -> sender())
       sender() ! ConnectionSuccess
 
       /* Implementare connessione non riuscita...*/
 
-    case Email() =>
 
-      // Verificare che il destinatario sia in userList
-    // if true mandare email
-    // if false mandare email con oggetto" Destinatario Sconosciuto "
+
+    /*Verificare che il destinatario sia in users
+    *   In caso positivo recupera ActorRef e manda l'email
+    *    In caso negativo manda un email con oggetto
+    *     "Destinatario sconosciuto*/
+
+    case Email() =>
+      users.foreach((x : (String ,ActorRef)) =>
+        if(  Email().destAddr.equals(x._1))
+        x._2 ! Email()else{
+          sender() ! Email().subject = "Destinatario Sconosciuto"
+        } )
+
 
     case Ack =>
       // Mandare ack a destinatario ( mittente dell'email )
