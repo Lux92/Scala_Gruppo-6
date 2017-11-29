@@ -23,9 +23,9 @@ class Client(id : String , server : ActorRef) extends Actor {
 
 
     /* Gestione della connessione */
-    case  ConnectionRequest =>
+    case  ConnectionRequest(id) =>
       log.info("Inizializzazione della Connessione")
-      server ! ConnectionRequest
+      server ! ConnectionRequest(id)
     case ConnectionSuccess=>
       log.info("Connessione Riuscita")
       // WriteMAIL
@@ -37,9 +37,11 @@ class Client(id : String , server : ActorRef) extends Actor {
 
       /* Email */
 
-    case Email=>
-      log.info("Ricevuta Email")
-      inbox =  Email() :: inbox
+    case Email(destAddr, srcAddr)=>
+      log.info("Ricevuta Email  da " + srcAddr )
+      inbox =  Email(destAddr,srcAddr) :: inbox
+      log.info("Aggiunta ad Inbox")
+      viewInbox
 
     case Ack =>
       log.info("Ricevuto ACK")
