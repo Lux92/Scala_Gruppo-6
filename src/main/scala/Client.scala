@@ -55,8 +55,20 @@ class Client(id : String , server : ActorRef) extends Actor {
 
   /* Funzione che printa le mail */
   def viewInbox() : Unit = {
-    println("EMAIL RICEVUTE")
+    println("EMAIL RICEVUTE: ")
     inbox.foreach((email : Email)=>println(email.toString))
+
+
+    def writeMail(destAddr: String , subject: String , body: String) : Email ={
+      val email =  Email(this.id , destAddr, subject,body )
+      email
+    }
+
+    def verifyMail(email : Email) : Boolean = {
+        if(email.subject.length() <= 64 && email.body.length() <= 255)
+      true
+        else false
+    }
 
   }
 
