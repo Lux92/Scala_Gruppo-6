@@ -18,11 +18,8 @@ object Main extends App {
 
   Thread.sleep(1000)
 
-  val email = new Email("psd", "asd")
-  email.subject = "Test".toCharArray
-  email.body = "Ciao".toCharArray
+  val email = new Email("psd", "asd", "test", "ciao")
 
-  println("body " + email.body.mkString(""))
 
   server ! email
 

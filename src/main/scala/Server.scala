@@ -28,25 +28,57 @@ class Server() extends Actor {
     *    In caso negativo manda un email con oggetto
     *     "Destinatario sconosciuto*/
 
-    case Email(destAddr,srcAddr) =>
+    case Email(destAddr,srcAddr, subject , body) =>
 
+      /* find = true se presente */
+      var find = false;
       log.info("Ricevuta Email da " + srcAddr)
+
       users.foreach((x : (String ,ActorRef)) =>
-        if(  destAddr.equals(x._1)) {
-        log.info("Mando Email a" + destAddr)
-          x._2 ! Email(destAddr, srcAddr)
+
+
+
+        if(  destAddr == x._1   ) {
+        log.info("Mando Email a " + destAddr)
+          x._2 ! Email(destAddr, srcAddr, subject , body)
+          find = true
         }
-        else{
+        else if(!find)  {
+          find = false;
+
+        }
+      )
+        if(!find) {
           log.info("Destinatario " + destAddr + " non presente ")
-          val email = new Email(destAddr,srcAddr)
-          email.subject ="Destinatario Sconosciuto".toCharArray
+
+          val email = Email(destAddr, srcAddr, subject, body)
+          email.subject = "Destinatario Sconosciuto"
+          email.body = ""
           sender() ! email
-        } )
+        }
 
 
-    case Ack =>
-      log.info("Ricevuto ACK")
-      // Mandare ack a destinatario ( mittente dell'email )
+    case Ack(srcAddr,dstAddr) =>
+      log.info("Ricevuto ACK da " + srcAddr)
+
+      var find = false
+      users.foreach((x : (String ,ActorRef)) =>
+
+
+        if(  dstAddr == x._1) {
+          find = true
+          log.info("Mando Ack a " + dstAddr)
+          x._2 ! Ack(srcAddr,dstAddr)
+        }
+        else if(!find) {
+           find = false
+        }
+      )
+      if(!find)
+        log.info("Destinatario  dell' ACK " + dstAddr + " non presente ")
+
+
+    // Mandare ack a destinatario ( mittente dell'email )
 
 
 

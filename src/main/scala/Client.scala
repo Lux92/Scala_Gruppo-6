@@ -37,19 +37,24 @@ class Client(id : String , server : ActorRef) extends Actor {
 
       /* Email */
 
-    case Email(destAddr, srcAddr)=>
+      /* Email ricevuta */
+    case Email(destAddr, srcAddr , subject , body)=>
       log.info("Ricevuta Email  da " + srcAddr )
-      inbox =  Email(destAddr,srcAddr) :: inbox
-      log.info("Aggiunta ad Inbox")
+       /* Aggiunge a Inbox*/
+      inbox =  Email(destAddr,srcAddr, subject , body) :: inbox
+      log.info("Aggiunta ad Inbox , invio ACK")
       viewInbox
+        /* Invia ACK */
+      server ! Ack(destAddr,srcAddr)
 
-    case Ack =>
-      log.info("Ricevuto ACK")
+
+    case Ack(srcAddr, dstAddr) =>
+      log.info("Ricevuto ACK da " + srcAddr  )
 
   }
 
   /* Funzione che printa le mail */
-  def viewInbox : Unit = {
+  def viewInbox() : Unit = {
     println("EMAIL RICEVUTE")
     inbox.foreach((email : Email)=>println(email.toString))
 
