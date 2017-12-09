@@ -30,9 +30,9 @@ class Client(id : String , server : ActorRef) extends Actor {
    /*
      if(verifyId(id))
         println("email corretta")
-
+*/
              server ! ConnectionRequest(id)
-    */
+
 
     case ConnectionSuccess=>
       log.info("Connessione Riuscita")
