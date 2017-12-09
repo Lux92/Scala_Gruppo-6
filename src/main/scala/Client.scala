@@ -8,7 +8,7 @@ import akka.event.Logging
 * */
 
 object Client {
-  def props(id: String , server : ActorRef  ): Props = Props(new Client(id , server))
+  def props( id: String , server : ActorRef  ): Props = Props(new Client(id , server))
 }
 
 class Client(id : String , server : ActorRef) extends Actor {
@@ -25,7 +25,15 @@ class Client(id : String , server : ActorRef) extends Actor {
     /* Gestione della connessione */
     case  ConnectionRequest(id) =>
       log.info("Inizializzazione della Connessione")
-      server ! ConnectionRequest(id)
+      val id : String = scala.io.StdIn.readLine()
+
+   /*
+     if(verifyId(id))
+        println("email corretta")
+
+             server ! ConnectionRequest(id)
+    */
+
     case ConnectionSuccess=>
       log.info("Connessione Riuscita")
       // WriteMAIL
@@ -56,8 +64,8 @@ class Client(id : String , server : ActorRef) extends Actor {
   /* Funzione che printa le mail */
   def viewInbox() : Unit = {
     println("EMAIL RICEVUTE: ")
-    inbox.foreach((email : Email)=>println(email.toString))
-
+    inbox.foreach((email: Email) => println(email.toString))
+  }
 
     def writeMail(destAddr: String , subject: String , body: String) : Email ={
       val email =  Email(this.id , destAddr, subject,body )
@@ -70,6 +78,11 @@ class Client(id : String , server : ActorRef) extends Actor {
         else false
     }
 
-  }
 
+  /* Funzione che verifica il formato dell'email */
+  def verifyId( id : String)
+ : Boolean = {
+    """(\w+)@([\w\.]+)""".r.unapplySeq(id).isDefined
+
+  }
 }
