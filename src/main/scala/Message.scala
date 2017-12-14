@@ -6,7 +6,7 @@
   case object ConnectionSuccess
   case object ConnectionFail
 
-  /* Email */
+  /* Messaggio */
 
   case class Message(txt : String){
     def getSrcAddr(): String = {
@@ -41,6 +41,30 @@
       } else {None}
     }
 
+
+    def verifyMessage(): Boolean ={
+      val roba  = this.unapply(this.txt).get
+      val src = roba._1
+      val dst = roba._2
+      val s = roba._3
+      val t = roba._4
+
+      if(verifyEmail(src))
+        println("Email sorgente corretta")
+      if(verifyEmail(dst))
+        println("Email destinatario corretta")
+
+      if(verifyEmail(src) && verifyEmail(dst))
+        true
+      else
+        false
+    }
+
+    def verifyEmail(id : String): Boolean = {
+
+      """(\w+)@([\w\.]+)""".r.unapplySeq(id).isDefined
+    }
+
     override def toString: String = {
       val roba  = this.unapply(this.txt).get
       val src = roba._1
@@ -50,18 +74,14 @@
      "Sorgente: " +  src + "Destinatario: " + dst +"Oggetto: " + s + "Testo: "+ t
 
     }
+
+
+
+
   }
 
   case class Email( msg: Message){
 
-
-    /*
-    var destAddr: String = ""
-    var srcAddr: String = ""
-
-    */
-   // var subject = new Array[Char](64)
-   // var body = new Array[Char](255)
     override def toString: String =
     {
       msg.toString

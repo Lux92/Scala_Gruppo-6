@@ -25,12 +25,7 @@ class Client(id : String , server : ActorRef) extends Actor {
     /* Gestione della connessione */
     case  ConnectionRequest(id) =>
       log.info("Inizializzazione della Connessione")
-   //   val id : String = scala.io.StdIn.readLine()
 
-   /*
-     if(verifyId(id))
-        println("email corretta")
-*/
              server ! ConnectionRequest(id)
 
 
@@ -70,18 +65,7 @@ class Client(id : String , server : ActorRef) extends Actor {
     inbox.foreach((email: Email) => println(email.toString))
   }
 
-  /*
-    def writeMail(destAddr: String , subject: String , body: String) : Email ={
-      val email =  Email(this.id , destAddr, subject,body )
-      email
-    }
 
-    def verifyMail(email : Email) : Boolean = {
-        if(email.subject.length() <= 64 && email.body.length() <= 255)
-      true
-        else false
-    }
-*/
 
   /* Funzione che verifica il formato dell'email */
   def verifyId( id : String)
