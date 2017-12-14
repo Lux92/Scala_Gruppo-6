@@ -28,19 +28,21 @@ class Server() extends Actor {
     *    In caso negativo manda un email con oggetto
     *     "Destinatario sconosciuto*/
 
-    case Email(destAddr,srcAddr, subject , body) =>
+    case Email(msg : Message) =>
 
       /* find = true se presente */
       var find = false;
-      log.info("Ricevuta Email da " + srcAddr)
+      val src = msg.getSrcAddr()
+      val dst = msg.getDstAddr()
+      log.info("Ricevuta Email da " + src)
 
       users.foreach((x : (String ,ActorRef)) =>
 
 
 
-        if(  destAddr == x._1   ) {
-        log.info("Mando Email a " + destAddr)
-          x._2 ! Email(destAddr, srcAddr, subject , body)
+        if(  dst == x._1   ) {
+        log.info("Mando Email a " + dst)
+          x._2 ! Email(msg)
           find = true
         }
         else if(!find)  {
@@ -49,11 +51,10 @@ class Server() extends Actor {
         }
       )
         if(!find) {
-          log.info("Destinatario " + destAddr + " non presente ")
+          log.info("Destinatario " + dst + " non presente ")
+          val msg = new Message(src + "&" + dst + "&" + "Destinatario Sconosciuto" + "&")
 
-          val email = Email(destAddr, srcAddr, subject, body)
-          email.subject = "Destinatario Sconosciuto"
-          email.body = ""
+          val email = Email(msg)
           sender() ! email
         }
 

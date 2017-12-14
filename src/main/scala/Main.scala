@@ -5,8 +5,8 @@ object Main extends App {
 
   val system = ActorSystem("ex1")
 
-   val id1: String = "asd"
-  val id2: String = "psd"
+   val id1: String = "alice@test.com"
+  val id2: String = "bob@test.com"
 
   val server = system.actorOf(Server.props(),name = "server")
   val client = system.actorOf(Client.props(id1 , server),name = "client")
@@ -19,7 +19,8 @@ object Main extends App {
 
   Thread.sleep(1000)
 
-  val email = new Email("psd", "asd", "test", "ciao")
+  val msg = new Message("alice@test.com" + "&" + "bob@test.com" + "&" + "Test" + "&" + "body Test")
+  val email = new Email(msg)
 
 
   server ! email

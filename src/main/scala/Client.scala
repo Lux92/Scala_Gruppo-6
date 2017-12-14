@@ -25,7 +25,7 @@ class Client(id : String , server : ActorRef) extends Actor {
     /* Gestione della connessione */
     case  ConnectionRequest(id) =>
       log.info("Inizializzazione della Connessione")
-      val id : String = scala.io.StdIn.readLine()
+   //   val id : String = scala.io.StdIn.readLine()
 
    /*
      if(verifyId(id))
@@ -46,14 +46,17 @@ class Client(id : String , server : ActorRef) extends Actor {
       /* Email */
 
       /* Email ricevuta */
-    case Email(destAddr, srcAddr , subject , body)=>
-      log.info("Ricevuta Email  da " + srcAddr )
+    case Email(msg)=>
+      val src = msg.getSrcAddr()
+      val dst = msg.getDstAddr()
+
+      log.info("Ricevuta Email  da " + src  )
        /* Aggiunge a Inbox*/
-      inbox =  Email(destAddr,srcAddr, subject , body) :: inbox
+      inbox =  Email( msg) :: inbox
       log.info("Aggiunta ad Inbox , invio ACK")
       viewInbox
         /* Invia ACK */
-      server ! Ack(destAddr,srcAddr)
+      server ! Ack(id,src)
 
 
     case Ack(srcAddr, dstAddr) =>
@@ -67,6 +70,7 @@ class Client(id : String , server : ActorRef) extends Actor {
     inbox.foreach((email: Email) => println(email.toString))
   }
 
+  /*
     def writeMail(destAddr: String , subject: String , body: String) : Email ={
       val email =  Email(this.id , destAddr, subject,body )
       email
@@ -77,7 +81,7 @@ class Client(id : String , server : ActorRef) extends Actor {
       true
         else false
     }
-
+*/
 
   /* Funzione che verifica il formato dell'email */
   def verifyId( id : String)
