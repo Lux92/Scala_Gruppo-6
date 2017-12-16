@@ -49,12 +49,18 @@
       val s = roba._3
       val t = roba._4
 
+      /* Usare Eccezioni ? Fa figo! */
+
       if(verifyEmail(src))
         println("Email sorgente corretta")
       if(verifyEmail(dst))
         println("Email destinatario corretta")
+      if(s.length()> 64)
+        println("Oggetto Email troppo grande")
+      if(t.length() > 255)
+        println("Testo Email troppo grande")
 
-      if(verifyEmail(src) && verifyEmail(dst))
+      if(verifyEmail(src) && verifyEmail(dst) && s.length() <= 64 && t.length() <= 255)
         true
       else
         false
