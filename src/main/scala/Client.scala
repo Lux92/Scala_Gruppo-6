@@ -1,17 +1,27 @@
-import akka.actor.{Actor, ActorRef, Props}
+import java.io.File
+
+import akka.actor.{Actor, ActorRef, ActorSelection, ActorSystem, Props}
 import akka.event.Logging
+import com.typesafe.config.ConfigFactory
 
 /* Client Actor che ha:
    - Un id corrispondente all' Email
    - Un ActorRef (ovvero il Server )
    - Una lista delle mail ricevute
 * */
-
+case class ViewInbox()
 object Client {
-  def props( id: String , server : ActorRef  ): Props = Props(new Client(id , server))
+  def props( id: String , server : ActorSelection  ): Props = Props(new Client(id , server))
+
+  /* Funzione che verifica il formato dell'email */
+  def verifyId( id : String)
+  : Boolean = {
+    """(\w+)@([\w\.]+)""".r.unapplySeq(id).isDefined
+
+  }
 }
 
-class Client(id : String , server : ActorRef) extends Actor {
+class Client(id : String , server : ActorSelection) extends Actor {
 
   /* Lista mail ricevute */
 
@@ -36,7 +46,7 @@ class Client(id : String , server : ActorRef) extends Actor {
       // server ! Email
 
     case ConnectionFail =>
-      log.info("Connessione Fallita")
+      log.info("Connessione Fallita cambia indirizzo")
 
       /* Email */
 
@@ -53,9 +63,10 @@ class Client(id : String , server : ActorRef) extends Actor {
         /* Invia ACK */
       server ! Ack(id,src)
 
-
     case Ack(srcAddr, dstAddr) =>
       log.info("Ricevuto ACK da " + srcAddr  )
+    case ViewInbox =>
+      viewInbox()
 
   }
 
@@ -67,10 +78,32 @@ class Client(id : String , server : ActorRef) extends Actor {
 
 
 
-  /* Funzione che verifica il formato dell'email */
-  def verifyId( id : String)
- : Boolean = {
-    """(\w+)@([\w\.]+)""".r.unapplySeq(id).isDefined
+}
+object ClientMain {
+  def main(args: Array[String]) {
+    val configFile = getClass.getClassLoader.getResource("client_configuration.conf").getFile
+    val config = ConfigFactory.parseFile(new File(configFile))
+    val system = ActorSystem("ClientSystem", config)
+    val serverActor = system.actorSelection("akka.tcp://RemoteSystem@127.0.0.1:2552/user/server")
+
+    println("Inserisci email")
+    val id = scala.io.StdIn.readLine()
+    if(Client.verifyId(id)) {
+      val clientActor = system.actorOf(Client.props(id, serverActor), name = "client")
+      clientActor ! ConnectionRequest(id)
+    }
+
+    println("Inserisci Email : (sorgente, destinazione, oggetto , testo) <separatore &> ")
+    val txt = scala.io.StdIn.readLine()
+    val msg = new Message(txt)
+    if(msg.verifyMessage())
+    {
+      val email = new Email(msg)
+      serverActor ! email
+    }
+
 
   }
 }
+
+

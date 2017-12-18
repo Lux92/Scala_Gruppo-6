@@ -2,7 +2,7 @@ import akka.actor.{ActorRef, ActorSystem}
 
 
 object Main extends App {
-
+/*
   var clients = List[ActorRef]()
   val system = ActorSystem("ex1")
 /*
@@ -73,5 +73,5 @@ if(verifyEmail(id)) {
   def verifyEmail(id : String): Boolean = {
 
     """(\w+)@([\w\.]+)""".r.unapplySeq(id).isDefined
-  }
+  }*/
 }

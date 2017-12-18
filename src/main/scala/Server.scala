@@ -1,5 +1,8 @@
-import akka.actor.{Actor, ActorRef, Props}
+import java.io.File
+
+import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 import akka.event.Logging
+import com.typesafe.config.ConfigFactory
 
 object Server {
   def props( ) :
@@ -16,10 +19,16 @@ class Server() extends Actor {
 // Connessione Riuscita
     case ConnectionRequest(id) =>
       log.info("Ricevuta richiesta di connessione da " + id )
-      users = users +  (id -> sender())
-      sender() ! ConnectionSuccess
-
-      /* Implementare connessione non riuscita...*/
+      if(!users.contains(id)) {
+        users = users + (id -> sender())
+        log.info("Connessione riuscita " +id)
+        sender() ! ConnectionSuccess
+      }
+      /* Se l'indirizzo email è già presente manda un connection Fail...*/
+      else {
+        log.info("indirizzo email già presente"+ id)
+        sender()! ConnectionFail
+      }
 
 
 
@@ -30,58 +39,53 @@ class Server() extends Actor {
 
     case Email(msg : Message) =>
 
-      /* find = true se presente */
-      var find = false;
+
+
       val src = msg.getSrcAddr()
       val dst = msg.getDstAddr()
       log.info("Ricevuta Email da " + src)
-
-      users.foreach((x : (String ,ActorRef)) =>
-
-
-
-        if(  dst == x._1   ) {
+      // verifica la presenza della destinazione
+      if( users.contains(dst)) {
+        val destination= users.get(dst).get
         log.info("Mando Email a " + dst)
-          x._2 ! Email(msg)
-          find = true
-        }
-        else if(!find)  {
-          find = false;
+        destination ! Email(msg)
 
-        }
-      )
-        if(!find) {
-          log.info("Destinatario " + dst + " non presente ")
-          val msg = new Message(src + "&" + dst + "&" + "Destinatario Sconosciuto" + "&")
-
-          val email = Email(msg)
-          sender() ! email
-        }
+      }
+      else {
+        log.info("Destinatario " + dst + " non presente ")
+        val msg = new Message(src + "&" + dst + "&" + "Destinatario Sconosciuto" + "&")
+        val email = Email(msg)
+        sender() ! email
+      }
 
 
     case Ack(srcAddr,dstAddr) =>
       log.info("Ricevuto ACK da " + srcAddr)
+      // verifica la presenza della destinazione
+      if( users.contains(dstAddr)) {
+        val destination= users.get(dstAddr).get
+        log.info("Mando Email a " + dstAddr)
+        destination ! Ack(srcAddr,dstAddr)
+      }
+      else {
+        log.info("Destination "+dstAddr +" not Found" )
+      }
 
-      var find = false
-      users.foreach((x : (String ,ActorRef)) =>
-
-
-        if(  dstAddr == x._1) {
-          find = true
-          log.info("Mando Ack a " + dstAddr)
-          x._2 ! Ack(srcAddr,dstAddr)
-        }
-        else if(!find) {
-           find = false
-        }
-      )
-      if(!find)
-        log.info("Destinatario  dell' ACK " + dstAddr + " non presente ")
-
-
-    // Mandare ack a destinatario ( mittente dell'email )
 
 
 
   }
 }
+  object ServerMain {
+    def main(args: Array[String]) {
+
+      val configFile = getClass.getClassLoader.getResource("remote_configuration.conf").getFile
+      //parse the config
+      val config = ConfigFactory.parseFile(new File(configFile))
+      //create an actor system with that config
+      val system = ActorSystem("RemoteSystem", config)
+      //create a remote actor from actorSystem
+      val remote = system.actorOf(Server.props(), name = "server")
+    }
+  }
+
