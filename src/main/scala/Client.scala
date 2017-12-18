@@ -13,12 +13,8 @@ case class ViewInbox()
 object Client {
   def props( id: String , server : ActorSelection  ): Props = Props(new Client(id , server))
 
-  /* Funzione che verifica il formato dell'email */
-  def verifyId( id : String)
-  : Boolean = {
-    """(\w+)@([\w\.]+)""".r.unapplySeq(id).isDefined
 
-  }
+
 }
 
 class Client(id : String , server : ActorSelection) extends Actor {
@@ -88,7 +84,7 @@ object ClientMain {
 
     println("Inserisci email")
     val id = scala.io.StdIn.readLine()
-    if(Client.verifyId(id)) {
+    if(Message.verifyEmail(id))  {
       val clientActor = system.actorOf(Client.props(id, serverActor), name = "client")
       clientActor ! ConnectionRequest(id)
     }

@@ -86,6 +86,15 @@
 
   }
 
+  object Message {
+
+    def verifyEmail(id : String): Boolean = {
+
+      """(\w+)@([\w\.]+)""".r.unapplySeq(id).isDefined
+    }
+  }
+
+
   case class Email( msg: Message){
 
     override def toString: String =
