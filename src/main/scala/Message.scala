@@ -1,7 +1,6 @@
 
 
   /* Messaggi per la connessione */
-  case object Init
   case class ConnectionRequest(id :String)
   case object ConnectionSuccess
   case object ConnectionFail
@@ -10,27 +9,27 @@
 
   case class Message(txt : String){
     def getSrcAddr(): String = {
-      val roba  = this.unapply(this.txt).get
-      val src = roba._1
+      val mail  = this.unapply(this.txt).get
+      val src = mail._1
       src
     }
     def getDstAddr(): String = {
-      val roba  = this.unapply(this.txt).get
-      val dst = roba._2
+      val mail  = this.unapply(this.txt).get
+      val dst = mail._2
       dst
     }
 
     def getSub( ): String = {
 
-      val roba  = this.unapply(this.txt).get
-      val sub = roba._3
+      val mail  = this.unapply(this.txt).get
+      val sub = mail._3
       sub
 
     }
 
     def getBody():String = {
-      val roba  = this.unapply(this.txt).get
-      val body = roba._4
+      val mail  = this.unapply(this.txt).get
+      val body = mail._4
       body
     }
 
@@ -41,15 +40,13 @@
       } else {None}
     }
 
-
     def verifyMessage(): Boolean ={
-      val roba  = this.unapply(this.txt).get
-      val src = roba._1
-      val dst = roba._2
-      val s = roba._3
-      val t = roba._4
+      val mail  = this.unapply(this.txt).get
+      val src = mail._1
+      val dst = mail._2
+      val s = mail._3
+      val t = mail._4
 
-      /* Usare Eccezioni ? Fa figo! */
 
       if(verifyEmail(src))
         println("Email sorgente corretta")
@@ -71,12 +68,16 @@
       """(\w+)@([\w\.]+)""".r.unapplySeq(id).isDefined
     }
 
+    def verifyMailFormat(msg : String): Boolean = {
+      """(\w+)@([\w\.]+)&(\w+)@([\w\.]+)&(\w{0,64})&(\w{0,255})""".r.unapplySeq(msg).isDefined
+    }
+
     override def toString: String = {
-      val roba  = this.unapply(this.txt).get
-      val src = roba._1
-      val dst = roba._2
-      val s = roba._3
-      val t = roba._4
+      val mail  = this.unapply(this.txt).get
+      val src = mail._1
+      val dst = mail._2
+      val s = mail._3
+      val t = mail._4
      "Sorgente: " +  src + "Destinatario: " + dst +"Oggetto: " + s + "Testo: "+ t
 
     }

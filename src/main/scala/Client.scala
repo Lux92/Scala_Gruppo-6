@@ -34,18 +34,13 @@ class Client(id : String , server : ActorSelection) extends Actor {
 
              server ! ConnectionRequest(id)
 
-
     case ConnectionSuccess=>
       log.info("Connessione Riuscita")
-      // WriteMAIL
-      //Verify Mail
-      // server ! Email
 
     case ConnectionFail =>
       log.info("Connessione Fallita cambia indirizzo")
 
       /* Email */
-
       /* Email ricevuta */
     case Email(msg)=>
       val src = msg.getSrcAddr()
@@ -82,22 +77,30 @@ object ClientMain {
     val system = ActorSystem("ClientSystem", config)
     val serverActor = system.actorSelection("akka.tcp://RemoteSystem@127.0.0.1:2552/user/server")
 
-    println("Inserisci email")
-    val id = scala.io.StdIn.readLine()
-    if(Message.verifyEmail(id))  {
-      val clientActor = system.actorOf(Client.props(id, serverActor), name = "client")
-      clientActor ! ConnectionRequest(id)
-    }
+    var correctMail = false
 
-    println("Inserisci Email : (sorgente, destinazione, oggetto , testo) <separatore &> ")
-    val txt = scala.io.StdIn.readLine()
-    val msg = new Message(txt)
-    if(msg.verifyMessage())
-    {
-      val email = new Email(msg)
-      serverActor ! email
+    while(!correctMail) {
+      println("Inserisci email")
+      val id = scala.io.StdIn.readLine()
+      if (Message.verifyEmail(id)) {
+        correctMail = true
+        val clientActor = system.actorOf(Client.props(id, serverActor), name = "client")
+        clientActor ! ConnectionRequest(id)
+      } else
+        println("Formato Email non corretto, riprovare [example@example.ex]")
     }
-
+    var correct =false
+    while(!correct) {
+      println("Inserisci Email : (sorgente, destinazione, oggetto , testo) <separatore &> ")
+      val txt = scala.io.StdIn.readLine()
+      val msg = new Message(txt)
+      if(msg.verifyMailFormat(txt)) {
+        correct = true
+        val email = new Email(msg)
+        serverActor ! email
+      } else
+        println("Formato email non corretto, riprovare...")
+    }
 
   }
 }
