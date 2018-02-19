@@ -70,25 +70,32 @@ class Client(id : String , server : ActorSelection) extends Actor {
 
 
 }
+/* Processo client */
 object ClientMain {
   def main(args: Array[String]) {
+    /* Configurazione akka.remote */
     val configFile = getClass.getClassLoader.getResource("client_configuration.conf").getFile
     val config = ConfigFactory.parseFile(new File(configFile))
     val system = ActorSystem("ClientSystem", config)
     val serverActor = system.actorSelection("akka.tcp://RemoteSystem@127.0.0.1:2552/user/server")
 
+    /* loop inserimento id del client*/
     var correctMail = false
 
     while(!correctMail) {
-      println("Inserisci email")
+      println("Inserisci email del client:")
       val id = scala.io.StdIn.readLine()
+      /* Verifica correttezza espressione */
       if (Message.verifyEmail(id)) {
         correctMail = true
+        /* Creazione attore e connessione al server */
         val clientActor = system.actorOf(Client.props(id, serverActor), name = "client")
         clientActor ! ConnectionRequest(id)
       } else
         println("Formato Email non corretto, riprovare [example@example.ex]")
     }
+
+     /*loop scrittura email */
     var correct =false
     while(!correct) {
       println("Inserisci Email : (sorgente, destinazione, oggetto , testo) <separatore &> ")

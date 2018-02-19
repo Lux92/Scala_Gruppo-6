@@ -33,6 +33,9 @@
       body
     }
 
+    /**
+      * funzione che splitta la stringa con separatore &
+      */
     def unapply(arg: String ): Option[(String, String , String , String)] =  {
       val pts =arg split "&"
       if(pts.length == 4) {
@@ -40,11 +43,15 @@
       } else {None}
     }
 
+    /*
+      verica formato mail secondo regex
+      */
     def verifyEmail(id : String): Boolean = {
 
       """(\w+)@([\w\.]+)""".r.unapplySeq(id).isDefined
     }
 
+    /* Verifica formato mail secondo regex */
     def verifyMailFormat(msg : String): Boolean = {
       """(\w+)@([\w\.]+)&(\w+)@([\w\.]+)&(\w{0,64})&(\w{0,255})""".r.unapplySeq(msg).isDefined
     }
@@ -63,7 +70,7 @@
 
 
   }
-
+/* Oggetto che contiene il messaggio */
   object Message {
 
     def verifyEmail(id : String): Boolean = {
@@ -73,6 +80,8 @@
   }
 
 
+  /* Email che contiene l'oggetto message */
+
   case class Email( msg: Message){
 
     override def toString: String =
@@ -81,6 +90,7 @@
     }
   }
 
+  /* Messaggio di ACK */
   case class Ack(srcAddr : String , dstAddr : String) {
 
   }
